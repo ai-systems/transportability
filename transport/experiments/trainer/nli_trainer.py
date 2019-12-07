@@ -71,9 +71,13 @@ class NLIExperiment(ConfigExperiment):
 
         if torch.cuda.device_count() == 1:
             model = model.cuda()
+            self.logger.info('GPUs used: 1')
         elif torch.cuda.device_count() > 1:
             model = model.cuda()
             model = torch.nn.DataParallel(model)
+            self.logger.info('GPUs used: {torch.cuda.device_count()}')
+        else:
+            self.logger.warn('No GPUs used!')
 
         no_decay = ['bias', 'LayerNorm.weight']
         optimizer_grouped_parameters = [
