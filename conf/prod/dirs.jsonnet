@@ -17,7 +17,7 @@ ner:{
     }
 },
 cache_path:{
-    model:std.extVar('PWD') + '/data/cache/train_scitail',
+    model:std.extVar('PWD') + '/data/cache/train_multi',
     train:std.extVar('PWD') + '/data/cache/train_multi',
     dev:std.extVar('PWD') + '/data/cache/dev_multi',
     test:std.extVar('PWD') + '/data/cache/test_multi',
