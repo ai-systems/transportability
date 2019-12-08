@@ -130,11 +130,11 @@ class NLIExperiment(ConfigExperiment):
                             f'Loss: {(tr_loss - logging_loss)/logging_steps}')
                         logging_loss = tr_loss
             eval_acc = self.evaluate(dev_loader, model)
-            self.logger.info('Dev accuracy: {eval_acc}')
+            self.logger.info(f'Dev accuracy: {eval_acc}')
             if accuracy < eval_acc:
                 output_dir = os.path.join(
                     self.path, 'checkpoint-{}'.format('best'))
-                self.logger.info('Saving best model to {output_dir}')
+                self.logger.info(f'Saving best model to {output_dir}')
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
                 # Take care of distributed/parallel training
