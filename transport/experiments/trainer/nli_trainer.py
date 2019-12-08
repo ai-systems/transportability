@@ -107,51 +107,50 @@ class NLIExperiment(ConfigExperiment):
         # Added here for reproductibility (even between python 2 and 3)
         self.set_seed(seed)
         if self.mode == 'train':
-        self.logger.info('Running training')
+            self.logger.info('Running training')
+            for _ in train_iterator:
+                epoch_iterator = tqdm(train_dataloader, desc="Train Iteration")
+                for step, batch in enumerate(epoch_iterator):
+                    model.train()
+                    batch = tuple(t.cuda() for t in batch)
+                    inputs = {'input_ids':      batch[0],
+                              'attention_mask': batch[1],
+                              'token_type_ids': batch[2],
+                              'labels':         batch[3]}
+                    outputs = model(**inputs)
+                    # model outputs are always tuple in transformers (see doc)
+                    loss = outputs[0]
 
-        for _ in train_iterator:
-            epoch_iterator = tqdm(train_dataloader, desc="Train Iteration")
-            for step, batch in enumerate(epoch_iterator):
-                model.train()
-                batch = tuple(t.cuda() for t in batch)
-                inputs = {'input_ids':      batch[0],
-                          'attention_mask': batch[1],
-                          'token_type_ids': batch[2],
-                          'labels':         batch[3]}
-                outputs = model(**inputs)
-                # model outputs are always tuple in transformers (see doc)
-                loss = outputs[0]
+                    if torch.cuda.device_count() > 1:
+                        loss = loss.mean()  # mean() to average on multi-gpu parallel training
+                    if gradient_accumulation_steps > 1:
+                        loss = loss / gradient_accumulation_steps
 
-                if torch.cuda.device_count() > 1:
-                    loss = loss.mean()  # mean() to average on multi-gpu parallel training
-                if gradient_accumulation_steps > 1:
-                    loss = loss / gradient_accumulation_steps
+                    loss.backward()
 
-                loss.backward()
-
-                tr_loss += loss.item()
-                if (step + 1) % gradient_accumulation_steps == 0:
-                    optimizer.step()
-                    scheduler.step()  # Update learning rate schedule
-                    model.zero_grad()
-                    global_step += 1
-                    if global_step % logging_steps == 0:
-                        epoch_iterator.set_description(
-                            f'Loss: {(tr_loss - logging_loss)/logging_steps}')
-                        logging_loss = tr_loss
-            eval_acc = self.evaluate(dev_loader, model)
-            self.logger.info(f'Dev accuracy: {eval_acc}')
-            if accuracy < eval_acc:
-                output_dir = os.path.join(
-                    self.path, 'checkpoint-{}'.format('best'))
-                self.logger.info(f'Saving best model to {output_dir}')
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
-                # Take care of distributed/parallel training
-                model_to_save = model.module if hasattr(
-                    model, 'module') else model
-                model_to_save.save_pretrained(output_dir)
-                # torch.save(args, os.path.join(output_dir, 'training_args.bin'))
+                    tr_loss += loss.item()
+                    if (step + 1) % gradient_accumulation_steps == 0:
+                        optimizer.step()
+                        scheduler.step()  # Update learning rate schedule
+                        model.zero_grad()
+                        global_step += 1
+                        if global_step % logging_steps == 0:
+                            epoch_iterator.set_description(
+                                f'Loss: {(tr_loss - logging_loss)/logging_steps}')
+                            logging_loss = tr_loss
+                eval_acc = self.evaluate(dev_loader, model)
+                self.logger.info(f'Dev accuracy: {eval_acc}')
+                if accuracy < eval_acc:
+                    output_dir = os.path.join(
+                        self.path, 'checkpoint-{}'.format('best'))
+                    self.logger.info(f'Saving best model to {output_dir}')
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+                    # Take care of distributed/parallel training
+                    model_to_save = model.module if hasattr(
+                        model, 'module') else model
+                    model_to_save.save_pretrained(output_dir)
+                    # torch.save(args, os.path.join(output_dir, 'training_args.bin'))
         else:
             eval_acc = self.evaluate(dev_loader, model)
             self.logger.info(f'Dev Accuracy: {eval_acc}')
