@@ -56,7 +56,7 @@ class NLIExperiment(ConfigExperiment):
         ), batch_size=train_batch_size, shuffle=True)
         dev_loader = DataLoader(SnliDataset(config_file=self.config_file, mode=DEV).get_dataset(
         ), batch_size=train_batch_size, shuffle=True)
-        test_loader = DataLoader(SnliDataset(config_file=self.config_file, mode=DEV).get_dataset(
+        test_loader = DataLoader(SnliDataset(config_file=self.config_file, mode=TEST).get_dataset(
         ), batch_size=train_batch_size, shuffle=True)
         t_total = len(
             train_dataloader) // gradient_accumulation_steps * num_train_epochs
@@ -146,6 +146,8 @@ class NLIExperiment(ConfigExperiment):
                     model_to_save.save_pretrained(output_dir)
                     # torch.save(args, os.path.join(output_dir, 'training_args.bin'))
         else:
+            eval_acc = self.evaluate(train_dataloader, model)
+            self.logger.info(f'Train Accuracy: {eval_acc}')
             eval_acc = self.evaluate(dev_loader, model)
             self.logger.info(f'Dev Accuracy: {eval_acc}')
             eval_acc = self.evaluate(test_loader, model)
