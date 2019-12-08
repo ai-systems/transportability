@@ -66,11 +66,13 @@ class SnliDataset(MsgPackDataset):
         bert_tokenizer = BertTokenizer.from_pretrained(BERT_MODEL)
         skipped = 0
         processed_data = {}
+        count = 0
         with open(self.dataset_path, 'r') as jsonl_file:
             json_data = [json.loads(line) for line in jsonl_file]
             for data in tqdm(json_data, 'Preporcessing SNLI'):
-                id, sentence1, sentence2, gold_label = data['pairID'], data[
+                id, sentence1, sentence2, gold_label = count, data[
                     'sentence1'], data['sentence2'], data['gold_label']
+                count += 1
                 if gold_label not in LABEL_MAP:
                     self.logger.warn(
                         f'{id} doesnot have mapped gold labels. Label - {gold_label}. Skipping it')
