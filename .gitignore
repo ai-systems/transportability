@@ -2,6 +2,7 @@
 ### Python template
 # Byte-compiled / optimized / DLL files
 data/*
+allen_mod/*
 .vscode/*
 !data/data.md
 __pycache__/
