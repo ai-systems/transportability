@@ -75,7 +75,7 @@ class NLIExperiment(ConfigExperiment):
         elif torch.cuda.device_count() > 1:
             model = model.cuda()
             model = torch.nn.DataParallel(model)
-            self.logger.info('GPUs used: {torch.cuda.device_count()}')
+            self.logger.info(f'GPUs used: {torch.cuda.device_count()}')
         else:
             self.logger.warn('No GPUs used!')
 
