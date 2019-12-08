@@ -4,6 +4,6 @@ train:{
 },
 regra_test: $['train'],
 eval:{
-    path:$['cache_path']['train'],
+    path:$['cache_path']['model'],
     mode:'eval'
 }
