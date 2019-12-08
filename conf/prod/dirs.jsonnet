@@ -1,5 +1,5 @@
 snli:{
-    dev:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_dev.txt',
+    dev:std.extVar('PWD') + '/data/multinli_1.0/multinli_1.0_train.jsonl',
     train:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_train.txt',
     test:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_test.txt',
 },
@@ -17,7 +17,7 @@ ner:{
     }
 },
 cache_path:{
-    model:std.extVar('PWD') + '/data/cache/train_multi',
+    model:std.extVar('PWD') + '/data/cache/train_scitail',
     train:std.extVar('PWD') + '/data/cache/train_multi',
     dev:std.extVar('PWD') + '/data/cache/dev_multi',
     test:std.extVar('PWD') + '/data/cache/test_multi',
