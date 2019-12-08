@@ -51,7 +51,7 @@ class NLIExperiment(ConfigExperiment):
         seed = 42
         logging_steps = 50
 
-        train_batch_size = 8 * max(1, torch.cuda.device_count())
+        train_batch_size = 16 * max(1, torch.cuda.device_count())
         train_dataloader = DataLoader(SnliDataset(config_file=self.config_file, mode=TRAIN).get_dataset(
         ), batch_size=train_batch_size, shuffle=True)
         dev_loader = DataLoader(SnliDataset(config_file=self.config_file, mode=DEV).get_dataset(
