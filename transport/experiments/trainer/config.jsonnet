@@ -1,7 +1,9 @@
 train:{
     path:$['cache_path']['train'],
+    mode:'train'
 },
 regra_test: $['train'],
-dev:{
-    path:$['cache_path']['dev'],
+eval:{
+    path:$['cache_path']['train'],
+    mode:'eval'
 }

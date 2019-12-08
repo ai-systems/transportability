@@ -25,6 +25,7 @@ EXPERIMENT_MPK = 'nli_experiment.mpk'
 
 
 class NLIExperiment(ConfigExperiment):
+    mode = luigi.Parameter(default='train')
     @overrides
     def requires(self):
         return [SnliDataset(config_file=self.config_file, mode=TEST),
@@ -50,8 +51,6 @@ class NLIExperiment(ConfigExperiment):
         seed = 42
         logging_steps = 50
 
-        model = BertForSequenceClassification.from_pretrained(BERT_MODEL)
-
         if torch.cuda.device_count() == 1:
             model = model.cuda()
         elif torch.cuda.device_count() > 1:
@@ -63,11 +62,21 @@ class NLIExperiment(ConfigExperiment):
         ), batch_size=train_batch_size, shuffle=True)
         dev_loader = DataLoader(SnliDataset(config_file=self.config_file, mode=DEV).get_dataset(
         ), batch_size=train_batch_size, shuffle=True)
+        test_loader = DataLoader(SnliDataset(config_file=self.config_file, mode=DEV).get_dataset(
+        ), batch_size=train_batch_size, shuffle=True)
         t_total = len(
             train_dataloader) // gradient_accumulation_steps * num_train_epochs
-        config = BertConfig.from_pretrained(BERT_MODEL, num_labels=3)
-        model = BertForSequenceClassification.from_pretrained(
-            BERT_MODEL, config=config)
+        if self.mode == 'train':
+            self.logger.info('Loading pretrained model')
+            config = BertConfig.from_pretrained(BERT_MODEL, num_labels=3)
+            model = BertForSequenceClassification.from_pretrained(
+                BERT_MODEL, config=config)
+        else:
+            self.logger.info('Loading trained model from local directory')
+            config = BertConfig.from_json_file(
+                f'{self.path}/checkpoint-best/config.json')
+            model = BertForSequenceClassification.from_pretrained(
+                f'{self.path}/checkpoint-best/pytorch_model.bin', config=config)
 
         if torch.cuda.device_count() == 1:
             model = model.cuda()
@@ -97,6 +106,7 @@ class NLIExperiment(ConfigExperiment):
         train_iterator = trange(int(num_train_epochs), desc="Epoch")
         # Added here for reproductibility (even between python 2 and 3)
         self.set_seed(seed)
+        if self.mode == 'train':
         self.logger.info('Running training')
 
         for _ in train_iterator:
@@ -142,6 +152,11 @@ class NLIExperiment(ConfigExperiment):
                     model, 'module') else model
                 model_to_save.save_pretrained(output_dir)
                 # torch.save(args, os.path.join(output_dir, 'training_args.bin'))
+        else:
+            eval_acc = self.evaluate(dev_loader, model)
+            self.logger.info(f'Dev Accuracy: {eval_acc}')
+            eval_acc = self.evaluate(test_loader, model)
+            self.logger.info(f'Test Accuracy: {eval_acc}')
 
     def evaluate(self, dataloader, model):
         self.logger.info('Running evalution of model')

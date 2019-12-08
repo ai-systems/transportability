@@ -1,8 +1,8 @@
 snli:{
-    dev:std.extVar('PWD') + '/data/snli_1.0/multinli_1.0_dev_matched.jsonl',
-    train:std.extVar('PWD') + '/data/snli_1.0/multinli_1.0_train.jsonl',
-    test:std.extVar('PWD') + '/data/snli_1.0/snli_1.0_test.jsonl',
-}, 
+    dev:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_dev.txt',
+    train:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_train.txt',
+    test:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_test.txt',
+},
 ner:{
     conll:{
         dev:std.extVar('PWD') + '/data/ner/conll2003/eng.testa',
@@ -16,10 +16,10 @@ ner:{
         test:std.extVar('PWD') + '/data/ner/twitter/emerging.test.annotated',
     }
 },
-cache_path:{
-    train:std.extVar('PWD') + '/data/cache/train',
-    dev:std.extVar('PWD') + '/data/cache/dev',
-    test:std.extVar('PWD') + '/data/cache/test',
+snli:{
+    dev:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_dev.txt',
+    train:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_train.txt',
+    test:std.extVar('PWD') + '/data/SciTailV1.1/snli_format/scitail_1.0_test.txt',
 },
 models:{
     allen_ner:std.extVar('PWD') + '/data/models/ner-model-2018.12.18.tar.gz',
